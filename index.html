@@ -1,40 +1,1056 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/webstorm-icon-logo.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WS playground</title>
-  <link rel="stylesheet" href="/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamee - Music Streaming Service</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ff4e33;
+            --dark: #1a1a1a;
+            --light-dark: #2a2a2a;
+            --light: #f5f5f5;
+            --gray: #888;
+            --player-height: 80px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        /* Main Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background-color: var(--light-dark);
+            padding: 20px 0;
+            height: calc(100vh - var(--player-height));
+            position: fixed;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            padding: 0 20px 20px;
+            color: var(--primary);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item i {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            background-color: rgba(255, 78, 51, 0.1);
+        }
+
+        .playlists {
+            margin-top: 30px;
+            padding: 0 20px;
+        }
+
+        .playlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .playlist-header h3 {
+            font-size: 14px;
+            text-transform: uppercase;
+            color: var(--gray);
+        }
+
+        .playlist-list {
+            list-style: none;
+        }
+
+        .playlist-item {
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--gray);
+            transition: color 0.3s;
+        }
+
+        .playlist-item:hover {
+            color: var(--light);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 240px;
+            padding: 20px;
+            height: calc(100vh - var(--player-height));
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: var(--light-dark);
+            border-radius: 20px;
+            padding: 8px 15px;
+            width: 300px;
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: var(--light);
+            margin-left: 10px;
+            width: 100%;
+            outline: none;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            cursor: pointer;
+        }
+
+        /* Content Sections */
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .tracks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .track-card {
+            background-color: var(--light-dark);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .track-card:hover {
+            transform: scale(1.03);
+        }
+
+        .track-cover {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+        }
+
+        .track-info {
+            padding: 15px;
+        }
+
+        .track-title {
+            font-size: 16px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .track-artist {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .track-play-btn {
+            position: absolute;
+            right: 15px;
+            bottom: 65px;
+            width: 45px;
+            height: 45px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .track-card:hover .track-play-btn {
+            opacity: 1;
+            transform: translateY(-10px);
+        }
+
+        /* Now Playing Section */
+        .now-playing {
+            margin-top: 40px;
+        }
+
+        /* Player */
+        .player {
+            height: var(--player-height);
+            background-color: var(--light-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .player-track {
+            display: flex;
+            align-items: center;
+            width: 25%;
+        }
+
+        .player-cover {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            margin-right: 15px;
+        }
+
+        .player-track-info {
+            flex: 1;
+        }
+
+        .player-track-title {
+            font-size: 14px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        .player-track-artist {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .player-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 50%;
+        }
+
+        .player-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .player-btn {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 16px;
+            margin: 0 15px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .player-btn.play-btn {
+            background-color: var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+        }
+
+        .player-progress {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            align-items: center;
+        }
+
+        .progress-time {
+            font-size: 12px;
+            color: var(--gray);
+            width: 40px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin: 0 10px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .progress-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 30%;
+            background-color: var(--primary);
+            border-radius: 2px;
+        }
+
+        .player-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            width: 25%;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+
+        .volume-bar {
+            width: 80px;
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin-left: 10px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .volume-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 80%;
+            background-color: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background-color: var(--light-dark);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-track-info {
+            display: flex;
+            margin-bottom: 30px;
+        }
+
+        .modal-track-cover {
+            width: 200px;
+            height: 200px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-right: 30px;
+        }
+
+        .modal-track-details {
+            flex: 1;
+        }
+
+        .modal-track-title {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .modal-track-artist {
+            font-size: 20px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .modal-track-actions {
+            display: flex;
+            margin-top: 30px;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: none;
+            margin-right: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-btn i {
+            margin-right: 8px;
+        }
+
+        .modal-play-btn {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .modal-playlist-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .modal-lyrics {
+            margin-top: 30px;
+        }
+
+        .lyrics-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .lyrics-content {
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                padding: 20px 0;
+            }
+            .nav-item span {
+                display: none;
+            }
+            .playlists {
+                display: none;
+            }
+            .main-content {
+                margin-left: 70px;
+            }
+            .logo {
+                text-align: center;
+                padding: 0 0 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .player-track-title,
+            .player-track-artist {
+                max-width: 120px;
+            }
+            .player-btn {
+                margin: 0 5px;
+            }
+        }
+    </style>
 </head>
 <body>
-<header class="logo">
-  <a href="https://www.jetbrains.com/webstorm/">
-    <img src="/webstorm-logo.svg" alt="WebStorm logo" width="344"
-         height="90">
-  </a>
-</header>
-<main id="app">
-  <h1 class="title">
-    Thank you for trying it out. <br /> Your first project is up and running
-    now.
-  </h1>
-  <section class="counter">
-    <div class="counter-info">
-      <p class="counter-text">Counter is</p>
-      <p class="counter-value" id="counter-value"></p>
+<div class="app-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">Streamee</div>
+        <ul class="nav-menu">
+            <li class="nav-item active">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-search"></i>
+                <span>Search</span>
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-music"></i>
+                <span>My Library</span>
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-heart"></i>
+                <span>Liked Songs</span>
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-clock"></i>
+                <span>Recent</span>
+            </li>
+        </ul>
+
+        <div class="playlists">
+            <div class="playlist-header">
+                <h3>Your Playlists</h3>
+                <i class="fas fa-plus"></i>
+            </div>
+            <ul class="playlist-list">
+                <li class="playlist-item">Chill Vibes</li>
+                <li class="playlist-item">Workout Mix</li>
+                <li class="playlist-item">Study Focus</li>
+                <li class="playlist-item">Summer Hits</li>
+                <li class="playlist-item">Road Trip</li>
+            </ul>
+        </div>
     </div>
-    <div class="counter-interaction">
-      <button id="increaseByOne" type="button">+1</button>
-      <button id="increaseByTwo" type="button">+2</button>
-      <button id="decreaseByOne" type="button">-1</button>
-      <button id="decreaseByTwo" type="button">-2</button>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search for songs, artists, or albums">
+            </div>
+            <div class="user-menu">
+                <span>Chandan</span>
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Recently Played</h2>
+        <div class="tracks-grid">
+            <div class="track-card" onclick="openTrackModal(0)">
+                <img src="https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5" alt="Track Cover" class="track-cover">
+                <div class="track-play-btn">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="track-info">
+                    <div class="track-title">Blinding Lights</div>
+                    <div class="track-artist">The Weeknd</div>
+                </div>
+            </div>
+            <div class="track-card" onclick="openTrackModal(1)">
+                <img src="https://i.scdn.co/image/ab67616d0000b273c8b444df094279e70d0ed856" alt="Track Cover" class="track-cover">
+                <div class="track-play-btn">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="track-info">
+                    <div class="track-title">Flowers</div>
+                    <div class="track-artist">Miley Cyrus</div>
+                </div>
+            </div>
+            <div class="track-card" onclick="openTrackModal(2)">
+                <img src="https://i.scdn.co/image/ab67616d0000b2734aeaaeeb0755f5d6d3e8492d" alt="Track Cover" class="track-cover">
+                <div class="track-play-btn">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="track-info">
+                    <div class="track-title">Save Your Tears</div>
+                    <div class="track-artist">The Weeknd</div>
+                </div>
+            </div>
+            <div class="track-card" onclick="openTrackModal(3)">
+                <img src="https://i.scdn.co/image/ab67616d0000b2738532ebe5f6834755695a0c1a" alt="Track Cover" class="track-cover">
+                <div class="track-play-btn">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="track-info">
+                    <div class="track-title">Levitating</div>
+                    <div class="track-artist">Dua Lipa</div>
+                </div>
+            </div>
+            <div class="track-card" onclick="openTrackModal(4)">
+                <img src="https://upload.wikimedia.org/wikipedia/en/5/5e/Justin_Bieber_-_Peaches.png" alt="Track Cover" class="track-cover">
+                <div class="track-play-btn">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="track-info">
+                    <div class="track-title">Peaches</div>
+                    <div class="track-artist">Justin Bieber</div>
+                </div>
+            </div>
+            <div class="track-card" onclick="openTrackModal(5)">
+                <img src="https://upload.wikimedia.org/wikipedia/en/7/7e/The_Kid_Laroi_and_Justin_Bieber_-_Stay.png" alt="Track Cover" class="track-cover">
+                <div class="track-play-btn">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="track-info">
+                    <div class="track-title">Stay</div>
+                    <div class="track-artist">The Kid LAROI, Justin Bieber</div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title now-playing">Made For You</h2>
+        <div class="tracks-grid">
+            <div class="track-card" onclick="openTrackModal(6)">
+                <img src="https://i.scdn.co/image/ab67616d0000b2738532ebe5f6834755695a0c1a" alt="Track Cover" class="track-cover">
+                <div class="track-play-btn">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="track-info">
+                    <div class="track-title">Don't Start Now</div>
+                    <div class="track-artist">Dua Lipa</div>
+                </div>
+            </div>
+            <div class="track-card" onclick="openTrackModal(7)">
+                <img src="https://upload.wikimedia.org/wikipedia/en/9/9c/Harry_Styles_-_As_It_Was.png" alt="Track Cover" class="track-cover">
+                <div class="track-play-btn">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="track-info">
+                    <div class="track-title">As It Was</div>
+                    <div class="track-artist">Harry Styles</div>
+                </div>
+            </div>
+            <div class="track-card" onclick="openTrackModal(8)">
+                <img src="https://upload.wikimedia.org/wikipedia/en/0/0a/Harry_Styles_-_Watermelon_Sugar.png" alt="Track Cover" class="track-cover">
+                <div class="track-play-btn">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="track-info">
+                    <div class="track-title">Watermelon Sugar</div>
+                    <div class="track-artist">Harry Styles</div>
+                </div>
+            </div>
+            <div class="track-card" onclick="openTrackModal(9)">
+                <img src="https://upload.wikimedia.org/wikipedia/en/9/9c/BTS_-_Dynamite_%28official_cover%29.png" alt="Track Cover" class="track-cover">
+                <div class="track-play-btn">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="track-info">
+                    <div class="track-title">Dynamite</div>
+                    <div class="track-artist">BTS</div>
+                </div>
+            </div>
+            <div class="track-card" onclick="openTrackModal(10)">
+                <img src="https://upload.wikimedia.org/wikipedia/en/1/1e/Post_Malone_and_Swae_Lee_-_Sunflower.png" alt="Track Cover" class="track-cover">
+                <div class="track-play-btn">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="track-info">
+                    <div class="track-title">Sunflower</div>
+                    <div class="track-artist">Post Malone, Swae Lee</div>
+                </div>
+            </div>
+            <div class="track-card" onclick="openTrackModal(11)">
+                <img src="https://upload.wikimedia.org/wikipedia/en/4/45/Ed_Sheeran_-_Bad_Habits.png" alt="Track Cover" class="track-cover">
+                <div class="track-play-btn">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="track-info">
+                    <div class="track-title">Bad Habits</div>
+                    <div class="track-artist">Ed Sheeran</div>
+                </div>
+            </div>
+        </div>
     </div>
-  </section>
-</main>
-<footer class="technologies">
-  <img src="/technologies.svg" alt="List of supported technologies">
-</footer>
-<script type="module" src="/src/main.js"></script>
-</body>
-</html>
+</div>
+
+<!-- Player -->
+<div class="player">
+    <div class="player-track">
+        <img src="https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5" alt="Track Cover" class="player-cover">
+        <div class="player-track-info">
+            <div class="player-track-title">Blinding Lights</div>
+            <div class="player-track-artist">The Weeknd</div>
+        </div>
+        <i class="fas fa-heart player-btn"></i>
+    </div>
+    <div class="player-controls">
+        <div class="player-buttons">
+            <buttons class="player-btn">
+                <i class="fas fa-random"></i>
+            </button>
+            <buttons class="player-btn">
+                <i class="fas fa-step-backward"></i>
+            </button>
+            <buttons class="player-btn play-btn">
+                <i class="fas fa-pause"></i>
+            </button>
+            <buttons class="player-btn">
+                <i class="fas fa-step-forward"></i>
+            </button>
+            <buttons class="player-btn">
+                <i class="fas fa-redo"></i>
+            </button>
+        </div>
+        <div class="player-progress">
+            <span class="progress-time">1:45</span>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <span class="progress-time">3:20</span>
+        </div>
+    </div>
+    <div class="player-actions">
+        <div class="volume-control">
+            <i class="fas fa-volume-up player-btn"></i>
+            <div class="volume-bar">
+                <div class="volume-fill"></div>
+            </div>
+        </div>
+        <buttons class="player-btn">
+            <i class="fas fa-list"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Track Modal -->
+<div class="modal" id="trackModal">
+    <div class="modal-content">
+        <buttons class="modal-close" onclick="closeModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-track-info">
+            <img id="modalTrackCover" src="" alt="Track Cover" class="modal-track-cover">
+            <div class="modal-track-details">
+                <h2 id="modalTrackTitle" class="modal-track-title">Track Title</h2>
+                <p id="modalTrackArtist" class="modal-track-artist">Artist Name</p>
+                <div class="modal-track-actions">
+                    <button class="modal-btn modal-play-btn" onclick="playCurrentModalTrack()">
+                        <i class="fas fa-play"></i> Play
+                    </button>
+                    <button class="modal-btn modal-playlist-btn">
+                        <i class="fas fa-plus"></i> Add to playlist
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="modal-lyrics">
+            <h3 class="lyrics-title">Lyrics</h3>
+            <div class="lyrics-content" id="modalTrackLyrics">
+                Loading lyrics...
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Sample tracks data
+    const tracks = [
+        {
+            id: 0,
+            title: "Blinding Lights",
+            artist: "The Weeknd",
+            cover: "https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5",
+            duration: "3:20",
+            lyrics: "I've been tryna call\nI've been on my own for long enough\nMaybe you can show me how to love, maybe\n\nI'm going through withdrawals\nYou don't even have to do too much\nYou can turn me on with just a touch, baby\n\nI look around and Sin City's cold and empty\nNo one's around to judge me\nI can't see clearly when you're gone\n\nI said, ooh, I'm blinded by the lights\nNo, I can't sleep until I feel your touch\nI said, ooh, I'm drowning in the night\nOh, when I'm like this, you're the one I trust\n\nHey, hey, hey\nHey, hey, hey"
+        },
+        {
+            id: 1,
+            title: "Flowers",
+            artist: "Miley Cyrus",
+            cover: "https://i.scdn.co/image/ab67616d0000b273c8b444df094279e70d0ed856",
+            duration: "3:20",
+            lyrics: "We were good, we were gold\nKinda dream that can't be sold\nWe were right 'til we weren't\nBuilt a home and watched it burn\n\nYeah, I didn't wanna leave you\nI didn't wanna lie\nStarted to cry but then remembered I\n\nI can buy myself flowers\nWrite my name in the sand\nTalk to myself for hours\nSay things you don't understand\nI can take myself dancing\nAnd I can hold my own hand\nYeah, I can love me better than you can\n\nCan love me better\nI can love me better, baby\nCan love me better\nI can love me better, baby"
+        },
+        {
+            id: 2,
+            title: "Save Your Tears",
+            artist: "The Weeknd",
+            cover: "https://i.scdn.co/image/ab67616d0000b2734aeaaeeb0755f5d6d3e8492d",
+            duration: "3:35",
+            lyrics: "Ooh, na-na, yeah\nI saw you dancing in a crowded room (Oh)\nYou look so happy when I'm not with you\nBut then you saw me, caught you by surprise\nA single teardrop falling from your eye\n\nI don't know why I run away\nI make you cry when I run away\n\nYou could've asked me why I broke your heart\nYou could've told me that you fell apart\nBut you walked past me like I wasn't there\nAnd just pretended like you didn't care\n\nI don't know why I run away\nI make you cry when I run away"
+        },
+        {
+            id: 3,
+            title: "Levitating",
+            artist: "Dua Lipa",
+            cover: "https://i.scdn.co/image/ab67616d0000b2738532ebe5f6834755695a0c1a",
+            duration: "3:23",
+            lyrics: "If you wanna run away with me, I know a galaxy\nAnd I can take you for a ride\nI had a premonition that we fell into a rhythm\nWhere the music don't stop for life\n\nGlitter in the sky, glitter in my eyes\nShining just the way I like\nIf you're feeling like you need a little bit of company\nYou met me at the perfect time\n\nYou want me, I want you, baby\nMy sugarboo, I'm levitating\nThe Milky Way, we're renegading\nYeah, yeah, yeah, yeah, yeah\n\nI got you, moonlight, you're my starlight\nI need you all night, come on, dance with me\nI'm levitating"
+        },
+        {
+            id: 4,
+            title: "Peaches",
+            artist: "Justin Bieber",
+            cover: "https://upload.wikimedia.org/wikipedia/en/5/5e/Justin_Bieber_-_Peaches.png",
+            duration: "3:18",
+            lyrics: "I get my light right from the source\nYeah, yeah (Ooh, that's right)\nAnd that source is you\nYeah, yeah\n\nI've been riding with you for six summers (Six summers)\nYeah, but I want 'em all (All)\nI got my eyes on you (I got my eyes on you)\nYou're everything I see\nI want your hot love and emotion, endlessly\nI can't get over you\nYou left your mark on me, on me\n\nI got my peach down in Georgia (Oh, yeah, yeah)\nI get my weed up in California (Oh, yeah, yeah)"
+        }
+    ]; // <-- Close the tracks array properly here
+
+    // Player state
+    let currentTrack = 0;
+    let isPlaying = false;
+    let isShuffle = false;
+    let isRepeat = false;
+    let likedTracks = new Set();
+    let progressInterval = null;
+
+    // DOM elements
+    const playerTitle = document.querySelector('.player-track-title');
+    const playerArtist = document.querySelector('.player-track-artist');
+    const playerCover = document.querySelector('.player-cover');
+    const playBtn = document.querySelector('.play-btn i');
+    const progressFill = document.querySelector('.progress-fill');
+    const progressBar = document.querySelector('.progress-bar');
+    const progressTimeCurrent = document.querySelector('.progress-time:first-child');
+    const progressTimeTotal = document.querySelector('.progress-time:last-child');
+    const heartBtn = document.querySelector('.player-track .fa-heart');
+    const shuffleBtn = document.querySelector('.fa-random').parentElement;
+    const repeatBtn = document.querySelector('.fa-redo').parentElement;
+    const nextBtn = document.querySelector('.fa-step-forward').parentElement;
+    const prevBtn = document.querySelector('.fa-step-backward').parentElement;
+
+    // Update player with track info
+    function updatePlayer(trackIndex) {
+        const track = tracks[trackIndex];
+        playerTitle.textContent = track.title;
+        playerArtist.textContent = track.artist;
+        playerCover.src = track.cover;
+        progressTimeTotal.textContent = track.duration;
+        // Update like button
+        if (likedTracks.has(trackIndex)) {
+            heartBtn.classList.add('liked');
+            heartBtn.style.color = 'var(--primary)';
+        } else {
+            heartBtn.classList.remove('liked');
+            heartBtn.style.color = '';
+        }
+        // Reset progress
+        progressFill.style.width = '0%';
+        progressTimeCurrent.textContent = '0:00';
+    }
+
+    // Play button click
+    function togglePlay() {
+        isPlaying = !isPlaying;
+        if (isPlaying) {
+            playBtn.classList.remove('fa-play');
+            playBtn.classList.add('fa-pause');
+            updateProgress();
+        } else {
+            playBtn.classList.remove('fa-pause');
+            playBtn.classList.add('fa-play');
+            if (progressInterval) clearInterval(progressInterval);
+        }
+    }
+
+    // Update progress bar
+    function updateProgress() {
+        if (progressInterval) clearInterval(progressInterval);
+        let current = 0;
+        const duration = 200; // seconds for demo
+
+        progressInterval = setInterval(() => {
+            if (!isPlaying) {
+                clearInterval(progressInterval);
+                return;
+            }
+            current++;
+            const percent = (current / duration) * 100;
+            progressFill.style.width = `${percent}%`;
+            // Format time
+            const minutes = Math.floor(current / 60);
+            const seconds = current % 60;
+            progressTimeCurrent.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+            if (current >= duration) {
+                clearInterval(progressInterval);
+                if (isRepeat) {
+                    updatePlayer(currentTrack);
+                    togglePlay();
+                } else {
+                    nextTrack();
+                }
+            }
+        }, 1000);
+    }
+
+    // Shuffle helper
+    function getNextTrackIndex() {
+        if (isShuffle) {
+            let next;
+            do {
+                next = Math.floor(Math.random() * tracks.length);
+            } while (next === currentTrack && tracks.length > 1);
+            return next;
+        }
+        return (currentTrack + 1) % tracks.length;
+    }
+
+    // Previous helper
+    function getPrevTrackIndex() {
+        if (isShuffle) {
+            let prev;
+            do {
+                prev = Math.floor(Math.random() * tracks.length);
+            } while (prev === currentTrack && tracks.length > 1);
+            return prev;
+        }
+        return (currentTrack - 1 + tracks.length) % tracks.length;
+    }
+
+    // Skip to next track
+    function nextTrack() {
+        currentTrack = getNextTrackIndex();
+        updatePlayer(currentTrack);
+        if (isPlaying) {
+            togglePlay();
+            togglePlay();
+        }
+    }
+
+    // Skip to previous track
+    function prevTrack() {
+        currentTrack = getPrevTrackIndex();
+        updatePlayer(currentTrack);
+        if (isPlaying) {
+            togglePlay();
+            togglePlay();
+        }
+    }
+
+    // Shuffle button
+    shuffleBtn.addEventListener('click', function() {
+        isShuffle = !isShuffle;
+        shuffleBtn.classList.toggle('active', isShuffle);
+        shuffleBtn.style.color = isShuffle ? 'var(--primary)' : '';
+    });
+
+    // Repeat button
+    repeatBtn.addEventListener('click', function() {
+        isRepeat = !isRepeat;
+        repeatBtn.classList.toggle('active', isRepeat);
+        repeatBtn.style.color = isRepeat ? 'var(--primary)' : '';
+    });
+
+    // Like (heart) button
+    heartBtn.addEventListener('click', function() {
+        if (likedTracks.has(currentTrack)) {
+            likedTracks.delete(currentTrack);
+        } else {
+            likedTracks.add(currentTrack);
+        }
+        updatePlayer(currentTrack);
+    });
+
+    // Modal functions
+    function openTrackModal(trackId) {
+        currentTrack = trackId;
+        const track = tracks[trackId];
+        document.getElementById('modalTrackTitle').textContent = track.title;
+        document.getElementById('modalTrackArtist').textContent = track.artist;
+        document.getElementById('modalTrackCover').src = track.cover;
+        document.getElementById('modalTrackLyrics').textContent = track.lyrics;
+        document.getElementById('trackModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('trackModal').classList.remove('active');
+    }
+
+    function playCurrentModalTrack() {
+        closeModal();
+        updatePlayer(currentTrack);
+        if (!isPlaying) {
+            togglePlay();
+        }
+    }
+
+    // Play button on track cards
+    document.querySelectorAll('.track-card').forEach((card, idx) => {
+        card.querySelector('.track-play-btn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            currentTrack = idx;
+            updatePlayer(currentTrack);
+            if (!isPlaying) togglePlay();
+        });
+    });
+
+    // Event listeners
+    document.querySelector('.play-btn').addEventListener('click', togglePlay);
+    nextBtn.addEventListener('click', nextTrack);
+    prevBtn.addEventListener('click', prevTrack);
+    progressBar.addEventListener('click', function(e) {
+        const percent = e.offsetX / this.offsetWidth;
+        progressFill.style.width = `${percent * 100}%`;
+        // Optionally update current time for demo
+        const duration = 200;
+        const current = Math.floor(percent * duration);
+        const minutes = Math.floor(current / 60);
+        const seconds = current % 60;
+        progressTimeCurrent.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+    });
+
+    // Initialize player with first track
+    updatePlayer(0);
+</script>
+ </html>
