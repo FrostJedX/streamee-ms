@@ -735,19 +735,19 @@
     </div>
     <div class="player-controls">
         <div class="player-buttons">
-            <button class="player-btn">
+            <buttons class="player-btn">
                 <i class="fas fa-random"></i>
             </button>
-            <button class="player-btn">
+            <buttons class="player-btn">
                 <i class="fas fa-step-backward"></i>
             </button>
-            <button class="player-btn play-btn">
+            <buttons class="player-btn play-btn">
                 <i class="fas fa-pause"></i>
             </button>
-            <button class="player-btn">
+            <buttons class="player-btn">
                 <i class="fas fa-step-forward"></i>
             </button>
-            <button class="player-btn">
+            <buttons class="player-btn">
                 <i class="fas fa-redo"></i>
             </button>
         </div>
@@ -766,7 +766,7 @@
                 <div class="volume-fill"></div>
             </div>
         </div>
-        <button class="player-btn">
+        <buttons class="player-btn">
             <i class="fas fa-list"></i>
         </button>
     </div>
@@ -775,7 +775,7 @@
 <!-- Track Modal -->
 <div class="modal" id="trackModal">
     <div class="modal-content">
-        <button class="modal-close" onclick="closeModal()">
+        <buttons class="modal-close" onclick="closeModal()">
             <i class="fas fa-times"></i>
         </button>
         <div class="modal-track-info">
@@ -847,9 +847,13 @@
         }
     ]; // <-- Close the tracks array properly here
 
-    // Current playing track
+    // Player state
     let currentTrack = 0;
     let isPlaying = false;
+    let isShuffle = false;
+    let isRepeat = false;
+    let likedTracks = new Set();
+    let progressInterval = null;
 
     // DOM elements
     const playerTitle = document.querySelector('.player-track-title');
@@ -860,6 +864,11 @@
     const progressBar = document.querySelector('.progress-bar');
     const progressTimeCurrent = document.querySelector('.progress-time:first-child');
     const progressTimeTotal = document.querySelector('.progress-time:last-child');
+    const heartBtn = document.querySelector('.player-track .fa-heart');
+    const shuffleBtn = document.querySelector('.fa-random').parentElement;
+    const repeatBtn = document.querySelector('.fa-redo').parentElement;
+    const nextBtn = document.querySelector('.fa-step-forward').parentElement;
+    const prevBtn = document.querySelector('.fa-step-backward').parentElement;
 
     // Update player with track info
     function updatePlayer(trackIndex) {
@@ -868,6 +877,17 @@
         playerArtist.textContent = track.artist;
         playerCover.src = track.cover;
         progressTimeTotal.textContent = track.duration;
+        // Update like button
+        if (likedTracks.has(trackIndex)) {
+            heartBtn.classList.add('liked');
+            heartBtn.style.color = 'var(--primary)';
+        } else {
+            heartBtn.classList.remove('liked');
+            heartBtn.style.color = '';
+        }
+        // Reset progress
+        progressFill.style.width = '0%';
+        progressTimeCurrent.textContent = '0:00';
     }
 
     // Play button click
@@ -880,73 +900,116 @@
         } else {
             playBtn.classList.remove('fa-pause');
             playBtn.classList.add('fa-play');
+            if (progressInterval) clearInterval(progressInterval);
         }
     }
 
     // Update progress bar
     function updateProgress() {
-        if (!isPlaying) return;
-
-        // Simulate progress for demo
+        if (progressInterval) clearInterval(progressInterval);
         let current = 0;
         const duration = 200; // seconds for demo
 
-        const interval = setInterval(() => {
+        progressInterval = setInterval(() => {
             if (!isPlaying) {
-                clearInterval(interval);
+                clearInterval(progressInterval);
                 return;
             }
-
             current++;
             const percent = (current / duration) * 100;
             progressFill.style.width = `${percent}%`;
-
             // Format time
             const minutes = Math.floor(current / 60);
             const seconds = current % 60;
             progressTimeCurrent.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
-
             if (current >= duration) {
-                current = 0;
-                // Play next track
-                currentTrack = (currentTrack + 1) % tracks.length;
-                updatePlayer(currentTrack);
+                clearInterval(progressInterval);
+                if (isRepeat) {
+                    updatePlayer(currentTrack);
+                    togglePlay();
+                } else {
+                    nextTrack();
+                }
             }
         }, 1000);
     }
 
+    // Shuffle helper
+    function getNextTrackIndex() {
+        if (isShuffle) {
+            let next;
+            do {
+                next = Math.floor(Math.random() * tracks.length);
+            } while (next === currentTrack && tracks.length > 1);
+            return next;
+        }
+        return (currentTrack + 1) % tracks.length;
+    }
+
+    // Previous helper
+    function getPrevTrackIndex() {
+        if (isShuffle) {
+            let prev;
+            do {
+                prev = Math.floor(Math.random() * tracks.length);
+            } while (prev === currentTrack && tracks.length > 1);
+            return prev;
+        }
+        return (currentTrack - 1 + tracks.length) % tracks.length;
+    }
+
     // Skip to next track
     function nextTrack() {
-        currentTrack = (currentTrack + 1) % tracks.length;
+        currentTrack = getNextTrackIndex();
         updatePlayer(currentTrack);
         if (isPlaying) {
-            // Reset progress for demo
-            progressFill.style.width = '0%';
-            progressTimeCurrent.textContent = '0:00';
+            togglePlay();
+            togglePlay();
         }
     }
 
     // Skip to previous track
     function prevTrack() {
-        currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
+        currentTrack = getPrevTrackIndex();
         updatePlayer(currentTrack);
         if (isPlaying) {
-            // Reset progress for demo
-            progressFill.style.width = '0%';
-            progressTimeCurrent.textContent = '0:00';
+            togglePlay();
+            togglePlay();
         }
     }
+
+    // Shuffle button
+    shuffleBtn.addEventListener('click', function() {
+        isShuffle = !isShuffle;
+        shuffleBtn.classList.toggle('active', isShuffle);
+        shuffleBtn.style.color = isShuffle ? 'var(--primary)' : '';
+    });
+
+    // Repeat button
+    repeatBtn.addEventListener('click', function() {
+        isRepeat = !isRepeat;
+        repeatBtn.classList.toggle('active', isRepeat);
+        repeatBtn.style.color = isRepeat ? 'var(--primary)' : '';
+    });
+
+    // Like (heart) button
+    heartBtn.addEventListener('click', function() {
+        if (likedTracks.has(currentTrack)) {
+            likedTracks.delete(currentTrack);
+        } else {
+            likedTracks.add(currentTrack);
+        }
+        updatePlayer(currentTrack);
+    });
 
     // Modal functions
     function openTrackModal(trackId) {
         currentTrack = trackId;
         const track = tracks[trackId];
-
         document.getElementById('modalTrackTitle').textContent = track.title;
         document.getElementById('modalTrackArtist').textContent = track.artist;
         document.getElementById('modalTrackCover').src = track.cover;
         document.getElementById('modalTrackLyrics').textContent = track.lyrics;
-
         document.getElementById('trackModal').classList.add('active');
     }
 
@@ -962,13 +1025,29 @@
         }
     }
 
+    // Play button on track cards
+    document.querySelectorAll('.track-card').forEach((card, idx) => {
+        card.querySelector('.track-play-btn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            currentTrack = idx;
+            updatePlayer(currentTrack);
+            if (!isPlaying) togglePlay();
+        });
+    });
+
     // Event listeners
     document.querySelector('.play-btn').addEventListener('click', togglePlay);
-    document.querySelector('.fa-step-forward').parentElement.addEventListener('click', nextTrack);
-    document.querySelector('.fa-step-backward').parentElement.addEventListener('click', prevTrack);
-    document.querySelector('.progress-bar').addEventListener('click', function(e) {
+    nextBtn.addEventListener('click', nextTrack);
+    prevBtn.addEventListener('click', prevTrack);
+    progressBar.addEventListener('click', function(e) {
         const percent = e.offsetX / this.offsetWidth;
         progressFill.style.width = `${percent * 100}%`;
+        // Optionally update current time for demo
+        const duration = 200;
+        const current = Math.floor(percent * duration);
+        const minutes = Math.floor(current / 60);
+        const seconds = current % 60;
+        progressTimeCurrent.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
     });
 
     // Initialize player with first track
