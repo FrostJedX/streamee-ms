@@ -1,8 +1,8 @@
-//TIP With Search Everywhere, you can find any action, file, or symbol in your project. Press <shortcut actionId="Shift"/> <shortcut actionId="Shift"/>, type in <b>terminal</b>, and press <shortcut actionId="EditorEnter"/>. Then run <shortcut raw="npm run dev"/> in the terminal and click the link in its output to open the app in the browser.
 
-// Streamee Main JavaScript
-// Handles dynamic rendering, player state, modal, and accessibility
-// All logic is modularized and commented for maintainability
+
+// streamee Main JavaScript
+// handles dynamic rendering, player state, modal, and accessibility
+
 
 // --- Tracks Data ---
 const tracks = [
@@ -104,7 +104,7 @@ const tracks = [
     }
 ];
 
-// --- Dynamic Track Card Rendering ---
+// --- dynamic track card rendering ---
 /**
  * Renders track cards into a grid by track indices.
  * @param {string} gridId - The DOM id of the grid container.
@@ -130,14 +130,14 @@ function renderTrackCards(gridId, trackIndices) {
                 <div class="track-artist">${track.artist}</div>
             </div>
         `;
-        // Play button on card
+        // play button on card
         card.querySelector('.track-play-btn').addEventListener('click', function(e) {
             e.stopPropagation();
             currentTrack = idx;
             updatePlayer(currentTrack);
             if (!isPlaying) togglePlay();
         });
-        // Keyboard accessibility for card
+        // keyboard accessibility for card
         card.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' || e.key === ' ') {
                 openTrackModal(idx);
@@ -147,7 +147,7 @@ function renderTrackCards(gridId, trackIndices) {
     });
 }
 
-// --- Player State and DOM ---
+// --- player state and DOM ---
 let currentTrack = 0;
 let isPlaying = false;
 let isShuffle = false;
@@ -171,7 +171,7 @@ const nextBtn = document.querySelector('.fa-step-forward').parentElement;
 const prevBtn = document.querySelector('.fa-step-backward').parentElement;
 
 /**
- * Updates the player UI with the current track info.
+ * updates the player UI with the current track info.
  * @param {number} trackIndex
  */
 function updatePlayer(trackIndex) {
@@ -193,7 +193,7 @@ function updatePlayer(trackIndex) {
 }
 
 /**
- * Toggles play/pause state and updates UI.
+ * toggles play/pause state and updates UI.
  */
 function togglePlay() {
     isPlaying = !isPlaying;
@@ -209,7 +209,7 @@ function togglePlay() {
 }
 
 /**
- * Updates the progress bar and time display.
+ * updates the progress bar and time display.
  */
 function updateProgress() {
     if (progressInterval) clearInterval(progressInterval);
@@ -238,7 +238,7 @@ function updateProgress() {
     }, 1000);
 }
 
-// --- Shuffle/Repeat/Like Logic ---
+// --- shuffle/repeat/like logic ---
 function getNextTrackIndex() {
     if (isShuffle) {
         let next;
@@ -276,7 +276,7 @@ function prevTrack() {
     }
 }
 
-// --- Event Listeners for Player Controls ---
+// --- event listeners for player controls ---
 shuffleBtn.addEventListener('click', function() {
     isShuffle = !isShuffle;
     shuffleBtn.classList.toggle('active', isShuffle);
@@ -296,7 +296,7 @@ heartBtn.addEventListener('click', function() {
     updatePlayer(currentTrack);
 });
 
-// --- Modal Functions ---
+// --- modal functions ---
 function openTrackModal(trackId) {
     currentTrack = trackId;
     const track = tracks[trackId];
@@ -305,7 +305,7 @@ function openTrackModal(trackId) {
     document.getElementById('modalTrackCover').src = track.cover;
     document.getElementById('modalTrackLyrics').textContent = track.lyrics;
     document.getElementById('trackModal').classList.add('active');
-    // Focus close button for accessibility
+    // focus close button for accessibility
     setTimeout(() => {
         document.querySelector('.modal-close').focus();
     }, 100);
@@ -320,12 +320,12 @@ function playCurrentModalTrack() {
         togglePlay();
     }
 }
-// Keyboard accessibility for modal
+// keyboard accessibility for modal
 window.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeModal();
 });
 
-// --- Player Controls ---
+// --- player controls ---
 const playBtnEl = document.querySelector('.play-btn');
 playBtnEl.addEventListener('click', togglePlay);
 nextBtn.addEventListener('click', nextTrack);
@@ -340,13 +340,13 @@ progressBar.addEventListener('click', function(e) {
     progressTimeCurrent.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
 });
 
-// --- Render Track Cards ---
+// --- render Track Cards ---
 renderTrackCards('recently-played-grid', [0,1,2,3,4,5]);
 renderTrackCards('made-for-you-grid', [6,7,8,9,10,11]);
 // --- Initialize player ---
 updatePlayer(0);
 
-// --- Accessibility: Focus visible for keyboard navigation ---
+// ---accessibility ---
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Tab') {
         document.body.classList.add('user-is-tabbing');
@@ -356,14 +356,12 @@ document.addEventListener('mousedown', function() {
     document.body.classList.remove('user-is-tabbing');
 });
 
-//TIP To find text strings in your project, you can use the <shortcut actionId="FindInPath"/> shortcut. Press it and type in <b>counter</b> – you'll get all matches in one place.
 
-//TIP There's much more in WebStorm to help you be more productive. Press <shortcut actionId="Shift"/> <shortcut actionId="Shift"/> and search for <b>Learn WebStorm</b> to open our learning hub with more things for you to try.
 
-// --- Custom Song Card Rendering and Play Logic ---
+// --- custom song card rendering and play logic ---
 const recentlyPlayed = document.getElementById("recently-played-grid");
 
-// Reusable card rendering function
+// reusable card rendering function
 function renderSongCard(song) {
   const cover = song.coverUrl || "https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2";
 
@@ -384,7 +382,7 @@ function renderSongCard(song) {
   recentlyPlayed.appendChild(card);
 }
 
-// Function to play song in player
+// the function to play song in player
 function playSong(url, title, artist, cover) {
   document.querySelector(".player-track-title").textContent = title;
   document.querySelector(".player-track-artist").textContent = artist;
@@ -396,10 +394,10 @@ function playSong(url, title, artist, cover) {
   window.currentAudio.play();
 }
 
-// Fetch all songs from backend
+//it fetch all songs from backend
 async function fetchSongs() {
   try {
-    const res = await fetch("http://localhost:5000/api/songs"); // your backend URL
+    const res = await fetch("http://localhost:5000/api/songs"); // my backend URL
     const data = await res.json();
 
     if (data.status === "success") {
@@ -446,8 +444,8 @@ fetch("http://localhost:5000/api/songs")
   })
   .catch(err => console.error("Fetch error:", err));
 
-// Streamee Main JavaScript - Modern Streaming UI
-// Fetch songs, render grid, and manage a fixed bottom player
+// streamee main javascript
+// to fetch songs, render grid, and fixed bottom player
 
 document.addEventListener('DOMContentLoaded', () => {
   const grid = document.getElementById('songsGrid');
@@ -466,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const songs = data.data.songs;
       grid.innerHTML = '';
       songs.forEach(song => {
-        // Use song.cover or song.coverUrl, and song.url or song.fileUrl
+        // using song.cover or song.coverUrl, and song.url or song.fileUrl
         const cover = song.cover || song.coverUrl || 'https://via.placeholder.com/120x120?text=No+Cover';
         const audioUrl = song.url || song.fileUrl;
         if (!audioUrl) return; // skip if no audio
