@@ -36,11 +36,11 @@
 
 This project aims to streamline the development of custom music streaming services. The core features include:
 
-- ** Responsive UI** – index.html + main.js deliver a dynamic, accessible interface.
-- ** Robust API** – Express.js routes, controllers, and models manage users, media uploads, and data.
-- ** Cloudinary Integration** – Seamlessly upload, store, and fetch audio/media files.
-- ** Easy Deployment** – `.env` configuration makes deployment consistent and secure.
-- ** Modular & Secure** – Built with scalability, security, and customization in mind.
+- **🖥️ Responsive UI** – index.html + main.js deliver a dynamic, accessible interface.
+- **🔧 Robust API** – Express.js routes, controllers, and models manage users, media uploads, and data.
+- **☁️ Cloudinary Integration** – Seamlessly upload, store, and fetch audio/media files.
+- **⚙️ Easy Deployment** – `.env` configuration makes deployment consistent and secure.
+- **🔒 Modular & Secure** – Built with scalability, security, and customization in mind.
 
 ##    Getting Started
 
