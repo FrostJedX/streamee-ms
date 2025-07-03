@@ -48,7 +48,7 @@ This project aims to streamline the development of custom music streaming servic
 - JavaScript
 - Node.js
 - npm
-- 
+  
 This project requires the following dependencies:
 
 **Programming Language**: JavaScript
