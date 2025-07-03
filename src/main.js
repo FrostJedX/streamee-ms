@@ -359,3 +359,144 @@ document.addEventListener('mousedown', function() {
 //TIP To find text strings in your project, you can use the <shortcut actionId="FindInPath"/> shortcut. Press it and type in <b>counter</b> – you'll get all matches in one place.
 
 //TIP There's much more in WebStorm to help you be more productive. Press <shortcut actionId="Shift"/> <shortcut actionId="Shift"/> and search for <b>Learn WebStorm</b> to open our learning hub with more things for you to try.
+
+// --- Custom Song Card Rendering and Play Logic ---
+const recentlyPlayed = document.getElementById("recently-played-grid");
+
+// Reusable card rendering function
+function renderSongCard(song) {
+  const cover = song.coverUrl || "https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2";
+
+  const card = document.createElement("div");
+  card.className = "track-card";
+
+  card.innerHTML = `
+    <img src="${cover}" class="track-cover" alt="${song.title}">
+    <div class="track-info">
+      <div class="track-title">${song.title}</div>
+      <div class="track-artist">${song.artist}</div>
+    </div>
+    <button class="track-play-btn" onclick="playSong('${song.fileUrl}', '${song.title}', '${song.artist}', '${cover}')">
+      <i class="fas fa-play"></i>
+    </button>
+  `;
+
+  recentlyPlayed.appendChild(card);
+}
+
+// Function to play song in player
+function playSong(url, title, artist, cover) {
+  document.querySelector(".player-track-title").textContent = title;
+  document.querySelector(".player-track-artist").textContent = artist;
+  document.querySelector(".player-cover").src = cover;
+
+  if (window.currentAudio) window.currentAudio.pause();
+
+  window.currentAudio = new Audio(url);
+  window.currentAudio.play();
+}
+
+// Fetch all songs from backend
+async function fetchSongs() {
+  try {
+    const res = await fetch("http://localhost:5000/api/songs"); // your backend URL
+    const data = await res.json();
+
+    if (data.status === "success") {
+      data.data.songs.forEach(song => {
+        renderSongCard({
+          title: song.title,
+          artist: song.artist,
+          url: song.url || song.fileUrl, // fallback if stored as fileUrl
+          coverUrl: song.coverUrl
+        });
+      });
+    } else {
+      console.error("❌ Failed to fetch songs:", data.message);
+    }
+  } catch (err) {
+    console.error("❌ Error fetching songs:", err);
+  }
+}
+
+// Run on page load
+fetchSongs();
+
+fetch("http://localhost:5000/api/songs")
+  .then(res => res.json())
+  .then(data => {
+    const songsContainer = document.getElementById("songs-container");
+
+    data.data.songs.forEach(song => {
+      const songCard = document.createElement("div");
+      songCard.className = "song-card";
+
+      songCard.innerHTML = `
+        <img src="${song.coverUrl}" alt="${song.title}" class="cover-img"/>
+        <h3>${song.title}</h3>
+        <p>${song.artist}</p>
+        <audio controls>
+          <source src="${song.url}" type="audio/mp3">
+          Your browser does not support the audio element.
+        </audio>
+      `;
+
+      songsContainer.appendChild(songCard);
+    });
+  })
+  .catch(err => console.error("Fetch error:", err));
+
+// Streamee Main JavaScript - Modern Streaming UI
+// Fetch songs, render grid, and manage a fixed bottom player
+
+document.addEventListener('DOMContentLoaded', () => {
+  const grid = document.getElementById('songsGrid');
+  const playerBar = document.getElementById('playerBar');
+  const playerCover = document.getElementById('playerCover');
+  const playerTitle = document.getElementById('playerTitle');
+  const playerArtist = document.getElementById('playerArtist');
+  const playerAudio = document.getElementById('playerAudio');
+  const playerSource = document.getElementById('playerSource');
+
+  let currentAudio = null;
+
+  fetch('http://localhost:5000/api/songs')
+    .then(res => res.json())
+    .then(data => {
+      const songs = data.data.songs;
+      grid.innerHTML = '';
+      songs.forEach(song => {
+        // Use song.cover or song.coverUrl, and song.url or song.fileUrl
+        const cover = song.cover || song.coverUrl || 'https://via.placeholder.com/120x120?text=No+Cover';
+        const audioUrl = song.url || song.fileUrl;
+        if (!audioUrl) return; // skip if no audio
+        const card = document.createElement('div');
+        card.className = 'song-card';
+        card.innerHTML = `
+          <img src="${cover}" alt="Cover" />
+          <div class="song-title">${song.title}</div>
+          <div class="song-artist">${song.artist}</div>
+          <button class="play-btn" aria-label="Play ${song.title}"><i class="fas fa-play"></i></button>
+        `;
+        const playBtn = card.querySelector('.play-btn');
+        playBtn.addEventListener('click', () => {
+          playSong({
+            ...song,
+            cover,
+            url: audioUrl
+          });
+        });
+        grid.appendChild(card);
+      });
+    });
+
+  function playSong(song) {
+    playerCover.src = song.cover;
+    playerTitle.textContent = song.title;
+    playerArtist.textContent = song.artist;
+    playerSource.src = song.url;
+    playerAudio.load();
+    playerBar.style.display = 'flex';
+    playerAudio.play();
+  }
+});
