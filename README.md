@@ -42,9 +42,9 @@ This project aims to streamline the development of custom music streaming servic
 - **⚙️ Easy Deployment** – `.env` configuration makes deployment consistent and secure.
 - **🔒 Modular & Secure** – Built with scalability, security, and customization in mind.
 
-## 🚀 Getting Started
+##    Getting Started
 
-### 📋 Prerequisites
+###   Prerequisites
 - JavaScript
 - Node.js
 - npm
@@ -54,23 +54,23 @@ This project requires the following dependencies:
 **Programming Language**: JavaScript
 **Package Manager**: Npm
 
-###Installation
+**Installation**
 
 Build streamee-ms from the source and install dependencies:
 
-#Clone the repository:
+**Clone the repository:**
 
-<pre> ```bash git clone https://github.com/FrostJedX/streamee-ms ``` </pre>
+<pre>❯ bash git clone https://github.com/FrostJedX/streamee-ms </pre>
 
-#Navigate to the project directory:
+**Navigate to the project directory:**
 
-❯ cd streamee-ms
+<pre>❯ cd streamee-ms </pre>
 
-#Install the dependencies:
+**Install the dependencies:**
 
 Using npm:
 
-❯ npm install
+<pre>❯ npm install</pre>  
 
 #Usage
 
@@ -78,7 +78,7 @@ Run the project with:
 
 Using npm:
 
-❯ npm start
+<pre>❯ npm start</pre>
 
 #Testing
 
@@ -86,5 +86,5 @@ Streamee-ms uses the {test_framework} test framework. Run the test suite with:
 
 Using npm:
 
-❯ npm test
+<pre>❯ npm test</pre>
 ⬆ Return
