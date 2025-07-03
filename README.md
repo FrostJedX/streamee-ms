@@ -72,7 +72,7 @@ Using npm:
 
 <pre>❯ npm install</pre>  
 
-#Usage
+**Usage**
 
 Run the project with:
 
@@ -80,11 +80,12 @@ Using npm:
 
 <pre>❯ npm start</pre>
 
-#Testing
+**Testing**
 
 Streamee-ms uses the {test_framework} test framework. Run the test suite with:
 
 Using npm:
 
 <pre>❯ npm test</pre>
+
 ⬆ Return
