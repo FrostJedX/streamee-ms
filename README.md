@@ -60,7 +60,7 @@ Build streamee-ms from the source and install dependencies:
 
 #Clone the repository:
 
-❯ git clone https://github.com/FrostJedX/streamee-ms
+<pre> ```bash git clone https://github.com/FrostJedX/streamee-ms ``` </pre>
 
 #Navigate to the project directory:
 
